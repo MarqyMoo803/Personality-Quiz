@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fun Personality Quiz</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .hidden { display: none; }
+    .fade-in { animation: fadeIn 1s forwards; }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    .quiz, .confession, .end, .result {
+      text-align: center;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      max-width: 500px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #ff6f61;
+      color: white;
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.1); }
+    #noBtn { position: absolute; }
+    .glow {
+      font-size: 24px;
+      font-weight: bold;
+      animation: glow 1s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 5px #ff6f61; }
+      to { text-shadow: 0 0 20px #ffdde1, 0 0 30px #ff6f61; }
+    }
+    .hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .heart {
+      position: absolute;
+      font-size: 24px;
+      animation: float 5s linear infinite;
+    }
+    @keyframes float {
+      from { transform: translateY(100vh); opacity: 1; }
+      to { transform: translateY(-10vh); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Music & Sounds -->
+  <audio id="bgMusic" src="sounds/abba-song.mp3" loop></audio>
+  <audio id="clickSound" src="sounds/click.mp3"></audio>
+  <audio id="sparkleSound" src="sounds/sparkle.mp3"></audio>
+  <audio id="cheerSound" src="sounds/cheer.mp3"></audio>
+
+  <!-- Start Screen -->
+  <div id="start" class="quiz">
+    <h1>Welcome to the Personality Quiz 🎮</h1>
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <!-- Quiz Screen -->
+  <div id="quiz" class="quiz hidden">
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+    <p id="message"></p>
+  </div>
+
+  <!-- Fake Result Screen -->
+  <div id="result" class="result hidden">
+    <h2 id="resultText">Analyzing your answers...</h2>
+  </div>
+
+  <!-- Confession Screen -->
+  <div id="confession" class="confession hidden">
+    <h2 class="glow">Can you be my girlfriend? 💕</h2>
+    <button id="yesBtn" onclick="sayYes()">Yes</button>
+    <button id="noBtn" onmouseover="moveNo()">No</button>
+  </div>
+
+  <!-- End Screen -->
+  <div id="end" class="end hidden">
+    <h2 id="finalMessage"></h2>
+    <div class="hearts" id="hearts"></div>
+  </div>
+
+<script>
+  const bgMusic = document.getElementById("bgMusic");
+  const clickSound = document.getElementById("clickSound");
+  const sparkleSound = document.getElementById("sparkleSound");
+  const cheerSound = document.getElementById("cheerSound");
+
+  const questions = [
+    {q: "What’s your favorite color?", a: ["Red", "Blue", "Pink", "Yellow"], m: "I like how bright your choice is 🌟"},
+    {q: "Do you prefer coffee or tea?", a: ["Coffee", "Tea"], m: "The way you smile makes my heart melt ☕💕"},
+    {q: "If we could travel, where would you go?", a: ["Paris", "Tokyo", "New York", "Seoul"], m: "I'd go anywhere with you ✈️"},
+    {q: "What’s your comfort food?", a: ["Pizza", "Ice cream", "Ramen", "Chocolate"], m: "I’d love to share that with you 🍫"},
+    {q: "Do you like movies or series more?", a: ["Movies", "Series"], m: "Maybe we could watch together sometime 🎬"},
+    {q: "Morning person or night owl?", a: ["Morning", "Night"], m: "I think we’d make a good match 🌙"},
+    {q: "Cats or dogs?", a: ["Cats", "Dogs", "Both!"], m: "Cute just like you 🐶🐱"},
+    {q: "What’s your dream date?", a: ["Beach", "Dinner", "Concert", "Park"], m: "I’d love to take you there 🌹"},
+    {q: "What song makes you happy?", a: ["Pop", "Rock", "Jazz", "Other"], m: "Maybe we can dance to it together 🎶"},
+    {q: "Do you believe in destiny?", a: ["Yes", "No", "Maybe"], m: "I believe you’re part of mine 💖"}
+  ];
+
+  const fakeResults = [
+    "You are adventurous 🌍",
+    "You are caring 💕",
+    "You are fun & outgoing 🎉",
+    "You are mysterious ✨",
+    "You are thoughtful 🌸",
+    "You are creative 🎨"
+  ];
+
+  let current = 0;
+
+  function startQuiz() {
+    document.getElementById("start").classList.add("hidden");
+    document.getElementById("quiz").classList.remove("hidden");
+    bgMusic.volume = 0.3;
+    bgMusic.play();
+    showQuestion();
+  }
+
+  function showQuestion() {
+    if (current >= questions.length) {
+      showResult();
+      return;
+    }
+    const q = questions[current];
+    document.getElementById("question").innerText = q.q;
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+    q.a.forEach(ans => {
+      const btn = document.createElement("button");
+      btn.innerText = ans;
+      btn.onclick = () => {
+        clickSound.play();
+        document.getElementById("message").innerText = q.m;
+        current++;
+        setTimeout(showQuestion, 1500);
+      };
+      answersDiv.appendChild(btn);
+    });
+  }
+
+  function showResult() {
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+    document.getElementById("resultText").innerText = "Analyzing your answers...";
+    setTimeout(() => {
+      const result = fakeResults[Math.floor(Math.random() * fakeResults.length)];
+      document.getElementById("resultText").innerText = result;
+    }, 2000);
+    setTimeout(showConfession, 4000);
+  }
+
+  function showConfession() {
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("confession").classList.remove("hidden");
+    sparkleSound.play();
+  }
+
+  function moveNo() {
+    const noBtn = document.getElementById("noBtn");
+    const x = Math.random() * (window.innerWidth - 100);
+    const y = Math.random() * (window.innerHeight - 50);
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+  }
+
+  function sayYes() {
+    document.getElementById("confession").classList.add("hidden");
+    document.getElementById("end").classList.remove("hidden");
+    cheerSound.play();
+    typeWriter("I know you love me, I love you too 💕", "finalMessage");
+    spawnHearts();
+    setTimeout(() => { bgMusic.volume = 0; }, 8000);
+  }
+
+  function typeWriter(text, id) {
+    let i = 0;
+    function typing() {
+      if (i < text.length) {
+        document.getElementById(id).innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typing, 100);
+      }
+    }
+    typing();
+  }
+
+  function spawnHearts() {
+    const heartsContainer = document.getElementById("hearts");
+    setInterval(() => {
+      const heart = document.createElement("div");
+      heart.classList.add("heart");
+      heart.innerText = "💖";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+      heartsContainer.appendChild(heart);
+      setTimeout(() => heart.remove(), 5000);
+    }, 300);
+  }
+</script>
+</body>
+</html>
